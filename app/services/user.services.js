@@ -1,4 +1,4 @@
-const User = require('../model/user.model');
+const User = require('../model/user.model')
 var bcrypt = require('bcrypt-nodejs') 
 
 exports.signUp = async function(req,res){
@@ -35,4 +35,13 @@ exports.signUp = async function(req,res){
        })
     })
 
+}
+
+exports.getValidUserById = async function(userId){
+    var user = User.findOne({
+        _id : userId,
+        isActive : true,
+        isDeleted : false
+    })
+    return user;
 }

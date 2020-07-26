@@ -1,21 +1,19 @@
 "use strict"
 const Note = require('../model/note.model')
 const User = require('../model/user.model')
-
+const userService = require('../services/user.services')
 class NoteService{
-    constructor(){
-                       
+    constructor(){                    
     }
-
     async addNote(req,res){
         try {
-            var user = await User.findOne({
-                _id: req.body.userId 
-            })
+            var user = await userService.getValidUserById(req.body.userId)
+            
             if(user){
                 var note = new Note({
                     title : req.body.title,
-                    content : req.body.content
+                    content : req.body.content,
+                    userId : user._id
                 })
                 var noteResponse = await Note.create(note)
                 res.send(noteResponse)

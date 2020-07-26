@@ -11,16 +11,24 @@ const UserSchema = mongoose.Schema(
             type: String, 
             unique: true 
         },
+        password:{
+            type : String,
+            require : true
+        },
         isVerified: { 
             type: Boolean, 
             default: false 
         },
-        password:{
-            type : String,
-            require : true
+        isActive : {
+            type : Boolean,
+            default : true
+        },
+        isDeleted : {
+            type : Boolean,
+            default : false
         }
     },{
-        timestamp : true
+        timestamps : true
     }     
 )
 module.exports = mongoose.model('User',UserSchema);

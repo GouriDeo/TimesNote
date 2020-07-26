@@ -12,11 +12,12 @@ const NoteSchema = mongoose.Schema(
             unique: true 
         },
         userId:  {
-            type : Schema.Types.ObjectId, ref : 'User'
+            type : Schema.Types.ObjectId, 
+            ref : 'User'
         }
         
     },{
-        timestamp : true
+        timestamps : true
     }     
 )
 module.exports = mongoose.model('Note',NoteSchema);
