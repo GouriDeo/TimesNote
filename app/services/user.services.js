@@ -1,7 +1,12 @@
 const User = require('../model/user.model')
-var bcrypt = require('bcrypt-nodejs') 
+var bcrypt = require('bcrypt-nodejs');
+var crypto = require('crypto');
+var nodemailer = require('nodemailer');
+var jwt = require('jsonwebtoken');
+var eventEmitter = require('../../events/events') 
+var Token = require('../model/token.model')
 
-exports.signUp = async function(req,res){
+exports.signUp = async function(req,res,next){
     var userExist = await User.findOne({
         email: req.body.email        
     })
@@ -29,12 +34,28 @@ exports.signUp = async function(req,res){
 
         let userResponse = await User.create(user)
 
-      // tokrnCreation(userResponse);
-       res.send({
+        var token = await new Token({
+            userId: userResponse._id,
+            token: crypto.randomBytes(16).toString('hex')
+        })
+        console.log(token);
+        await token.save(async function(err){
+            if(err){
+                return res.status(500).send({
+                    message: err.message
+                })
+            }
+            else{
+                let subject = 'account verification token'
+                let text = token.token
+                eventEmitter.emit('sendEmail',subject,user,text)
+                
+            }
+        })
+        res.send({
            status : userResponse.name + 'Registered'
        })
     })
-
 }
 
 exports.getValidUserById = async function(userId){
