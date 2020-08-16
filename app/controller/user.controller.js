@@ -17,3 +17,7 @@ exports.createUser = function(req,res){
          userService.signUp(req,res)
      }     
 }
+
+exports.verifyAccount = function (req,res){
+    userService.verifyAccount(req,res);
+}
