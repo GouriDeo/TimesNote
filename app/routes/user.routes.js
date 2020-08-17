@@ -8,6 +8,8 @@ router.post('/',userController.createUser);
 //router.post('/verify',userController.confirmAccount);
 router.post('/confirmAccount',userController.verifyAccount);
 router.post('/login',userController.login);
+router.post('/forgetPassword',userController.forgetPassword);
+router.post('/updatePassword',userController.updatePassword);
 
 
 module.exports = router

@@ -151,3 +151,84 @@ exports.login = async function(req,res){
         res.send(err)
     }
 }
+
+exports.forgetPassword = async function(req,res){
+    var userExist = await User.findOne({
+        email: req.body.email        
+    })
+    if(!userExist){
+        return res.status(401).send({
+            message:'User does not exists, may be account is deleted'
+        })
+    }   
+    
+    var token = await new Token({
+        userId: userExist._id,
+        token: crypto.randomBytes(16).toString('hex')
+    })
+
+    await token.save( function(err){
+        if(err){
+            return res.status(500).send({
+                message: err.message
+            })
+        }
+        else{
+            let subject = 'account verification token'
+            let text = "To verify the account please on the link given: \n http://localhost:4200/updatepassword/" +token.token
+            eventEmitter.emit('sendEmail',subject,userExist,text)
+            
+        }
+    })
+    res.send({
+        status: userExist.email+' token is send'
+    })           
+}
+
+exports.updatePassword = async function(req,res){
+    try{
+        var userToken = await Token.findOne({
+            token:req.body.token
+        })
+        if(!userToken){
+            return res.status(400).send({
+                message:"Invalid token or your token might be expired."
+            })
+        }
+        var user = await User.findOne({
+            _id:userToken.userId
+        })
+           
+        if(user){
+           await bcrypt.hash(req.body.password,bcrypt.genSaltSync(10),null,async function(err,hash){
+                if(err){
+                   throw err
+                }
+                else{
+                    user.password = hash
+                }
+            })
+            user.save(function(err) {
+                if(err){
+                    return res.status(500).send({
+                       message:'Something went wrong.'
+                   })
+                }
+                else{
+                    return res.status(200).send({
+                        message:'Password reset successfully.'
+                    })
+                }
+            })
+
+        }
+        else{
+            return res.status(401).send({
+                message:'User does not exists.'
+            })
+        }
+    }
+    catch(err){
+        res.send(err)
+    }   
+}
