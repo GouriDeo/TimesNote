@@ -105,3 +105,49 @@ exports.getValidUserById = async function(userId){
         res.send(err)
     }
 }
+
+exports.login = async function(req,res){
+    try{
+        var userExists = await User.findOne({
+            email:req.body.email
+        })
+        if(userExists){
+            if(bcrypt.compareSync(req.body.password,userExists.password)){
+                if(!userExists.isVerified){
+                   return res.status(401).send({
+                        message : "User is not verified"
+                    })
+                }
+                if(userExists.isActive == false && userExists.isDeleted == true){
+                    res.status(401).send({
+                        message : "User does not exists."
+                    })
+                }
+
+                const payload = {
+                    _id : userExists._id,
+                    email: userExists.email,
+                    name : userExists.name
+                }
+
+                let token = jwt.sign(payload, process.env.SECRET_KEY,{
+                    expiresIn:1140
+                })
+                res.json({token:token})
+
+            }else{
+                res.status(401).send({
+                    message : "Worng password"
+                })
+            }
+        }
+        else{
+            res.status(401).send({
+                message : "Invalid email"
+            })
+        }
+    }
+    catch(err){
+        res.send(err)
+    }
+}
